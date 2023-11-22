@@ -52,7 +52,7 @@ pipeline {
             steps {
                 script {
                     try {
-                        sh 'curl http://104.154.199.135/'
+                        sh 'curl http://35.202.6.167/'
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         sh """

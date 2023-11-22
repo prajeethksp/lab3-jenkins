@@ -1,12 +1,11 @@
-pipeline {
+ecpipeline {
     agent any
 
     stages {
-        stage('Stage 1 -> Cloning Repo and moving files to bucket') {
+        stage('Stage 1: Cloning Repository and moving files into bucket') {
             steps {
                 script {
                     try {
-                        // Your Stage 1 steps here
                         echo 'Cloning the Repo'
                         sh 'rm -fr *'
                         sh 'git clone https://github.com/prajeethksp/lab3-jenkins.git'
@@ -18,7 +17,7 @@ pipeline {
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         sh """
-                        gcloud logging write Jenkins '{"Stage": "stage1", "Message":"Stage 1 execution Failed"}' --payload-type=json --severity=CRITICAL
+                        gcloud logging write Jenkins '{"Stage": "stage1", "Message":"Execution of Stage 1 Failed"}' --payload-type=json --severity=CRITICAL
                         """
                         error("Stage 1 failed: ${e.message}")
                     }
@@ -26,7 +25,7 @@ pipeline {
             }
         }
 
-        stage('Stage 2 -> Fetching files from bucket and deploying itm to production' ) {
+        stage('Stage 2: Fetching files from bucket and deploying it') {
             steps {
                 script {
                     try {
@@ -39,7 +38,7 @@ pipeline {
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         sh """
-                        gcloud logging write Jenkins '{"Stage": "stage2", "Message":"Stage 2 execution Failed"}' --payload-type=json --severity=CRITICAL
+                        gcloud logging write Jenkins '{"Stage": "stage2", "Message":"Execution of Stage 2 Failed"}' --payload-type=json --severity=CRITICAL
                         """
                         error("Stage 2 failed: ${e.message}")
                         
@@ -48,7 +47,7 @@ pipeline {
             }
         }
 
-        stage('Stage 3 -> Testing') {
+        stage('Stage 3: Testing') {
             steps {
                 script {
                     try {
@@ -56,7 +55,7 @@ pipeline {
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         sh """
-                        gcloud logging write Jenkins '{"Stage": "stage3", "Message":"Stage 3 execution Failed"}' --payload-type=json --severity=CRITICAL
+                        gcloud logging write Jenkins '{"Stage": "stage3", "Message":"Execution of Stage 3 Failed"}' --payload-type=json --severity=CRITICAL
                         """
                         error("Stage 3 failed: ${e.message}")
                     }
@@ -68,7 +67,7 @@ pipeline {
     post {
         always {
             // This block will always run, regardless of the stage results
-            echo "Pipeline completed. Result: ${currentBuild.result}"
+            echo "Pipeline finished. Result: ${currentBuild.result}"
         }
     }
 }

@@ -1,4 +1,4 @@
-ecpipeline {
+pipeline {
     agent any
 
     stages {

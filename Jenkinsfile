@@ -1,51 +1,74 @@
 pipeline {
     agent any
 
-    // environment {
-    //     GCLOUD_PROJECT = 'cloud-labs-405222'
-    //     GCLOUD_ZONE = 'us-central1-a'
-    //     GCLOUD_INSTANCE = 'jenkins-launched-server'
-    //     GCLOUD_SERVICE_KEY = credentials('jenkins-sa.json')
-    // }
-
     stages {
-        stage('Checkout') {
+        stage('Stage 1 -> Cloning Repo and moving files to bucket') {
             steps {
-                // Checkout the code from the GitHub repository
-                checkout scm
+                script {
+                    try {
+                        // Your Stage 1 steps here
+                        echo 'Cloning the Repo'
+                        sh 'rm -fr *'
+                        sh 'git clone https://github.com/edith01/lab3.git'
+                        withCredentials([file(credentialsId: 'gcloud-creds', variable: 'GCLOUD_CREDS')]) {
+        
+                            sh 'gsutil -m cp -r /var/lib/jenkins/workspace/lab3/* gs://test1lab/'
+                        }
+                        sh "gcloud compute ssh  imranc42@instance-1 --zone=us-central1-a --command 'sudo apt install apache2 -y'"
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        sh """
+                        gcloud logging write Jenkins '{"Stage": "stage1", "Message":"Stage 1 execution Failed"}' --payload-type=json --severity=CRITICAL
+                        """
+                        error("Stage 1 failed: ${e.message}")
+                    }
+                }
             }
         }
 
-        stage('Build') {
+        stage('Stage 2 -> Fetching files from bucket and deploying itm to production' ) {
             steps {
-                // For a simple HTML site, no build step is needed
-                // You might want to copy the files to a specific directory if needed
-                //sh 'sudo apt -y install apache2'
-                //sh 'wget https://archive.apache.org/dist/httpd/httpd-2.4.51.tar.gz'
-                //sh 'tar -zxvf httpd-2.4.51.tar.gz'
-                  echo 'Build and deployment started!'
+                script {
+                    try {
+                        sh 'rm -rf *'
+                        //sh 'gsutil cp -r gs://test1lab/ /'
+                        sh "gcloud compute ssh  imranc42@instance-1 --zone=us-central1-a --command 'sudo gsutil -m cp -r gs://test1lab/ /var/lib/jenkins/workspace/; cd lab3; ls'"
+                        sh "gcloud compute ssh  imranc42@instance-1 --zone=us-central1-a --command 'sudo rm -rf /var/www/html/* ;sudo mv /var/lib/jenkins/workspace/test1lab/lab3/* /var/www/html/'"
+                    
+                        //sh 'false'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        sh """
+                        gcloud logging write Jenkins '{"Stage": "stage2", "Message":"Stage 2 execution Failed"}' --payload-type=json --severity=CRITICAL
+                        """
+                        error("Stage 2 failed: ${e.message}")
+                        
+                    }
+                }
             }
         }
 
-        stage('Deploy') {
+        stage('Stage 3 -> Testing') {
             steps {
-                // Deploy the HTML site to a web server or hosting service
-                // For example, copying the files to a web server directory
-                sh 'cp -r * /var/www/html/'
-                //sh 'mkdir -p $WORKSPACE/html/'
-                //sh 'cp -r * $WORKSPACE/html/'
+                script {
+                    try {
+                        sh 'curl http://104.154.199.135/'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        sh """
+                        gcloud logging write Jenkins '{"Stage": "stage3", "Message":"Stage 3 execution Failed"}' --payload-type=json --severity=CRITICAL
+                        """
+                        error("Stage 3 failed: ${e.message}")
+                    }
+                }
             }
         }
     }
 
     post {
-        success {
-            // Notification or additional steps on success
-            echo 'Build and deployment successful!'
-        }
-        failure {
-            // Notification or additional steps on failure
-            echo 'Build or deployment failed!'
+        always {
+            // This block will always run, regardless of the stage results
+            echo "Pipeline completed. Result: ${currentBuild.result}"
         }
     }
 }

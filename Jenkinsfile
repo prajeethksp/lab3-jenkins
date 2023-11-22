@@ -9,12 +9,12 @@ pipeline {
                         // Your Stage 1 steps here
                         echo 'Cloning the Repo'
                         sh 'rm -fr *'
-                        sh 'git clone https://github.com/edith01/lab3.git'
+                        sh 'git clone https://github.com/prajeethksp/lab3-jenkins.git'
                         withCredentials([file(credentialsId: 'gcloud-creds', variable: 'GCLOUD_CREDS')]) {
         
                             sh 'gsutil -m cp -r /var/lib/jenkins/workspace/lab3/* gs://test1lab/'
                         }
-                        sh "gcloud compute ssh  imranc42@instance-1 --zone=us-central1-a --command 'sudo apt install apache2 -y'"
+                        sh "gcloud compute ssh  iamprajeeth@instance-1 --zone=us-central1-a --command 'sudo apt install apache2 -y'"
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         sh """
@@ -32,8 +32,8 @@ pipeline {
                     try {
                         sh 'rm -rf *'
                         //sh 'gsutil cp -r gs://test1lab/ /'
-                        sh "gcloud compute ssh  imranc42@instance-1 --zone=us-central1-a --command 'sudo gsutil -m cp -r gs://test1lab/ /var/lib/jenkins/workspace/; cd lab3; ls'"
-                        sh "gcloud compute ssh  imranc42@instance-1 --zone=us-central1-a --command 'sudo rm -rf /var/www/html/* ;sudo mv /var/lib/jenkins/workspace/test1lab/lab3/* /var/www/html/'"
+                        sh "gcloud compute ssh  iamprajeeth@instance-1 --zone=us-central1-a --command 'sudo gsutil -m cp -r gs://test1lab/ /var/lib/jenkins/workspace/; cd lab3; ls'"
+                        sh "gcloud compute ssh  iamprajeeth@instance-1 --zone=us-central1-a --command 'sudo rm -rf /var/www/html/* ;sudo mv /var/lib/jenkins/workspace/test1lab/lab3/* /var/www/html/'"
                     
                         //sh 'false'
                     } catch (Exception e) {

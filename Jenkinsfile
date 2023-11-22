@@ -12,7 +12,7 @@ pipeline {
                         sh 'git clone https://github.com/prajeethksp/lab3-jenkins.git'
                         withCredentials([file(credentialsId: 'gcloud-creds', variable: 'GCLOUD_CREDS')]) {
         
-                            sh 'gsutil -m cp -r /var/lib/jenkins/workspace/lab3-jenkins/* gs://test1lab'
+                            sh 'gsutil -m cp -r /var/lib/jenkins/workspace/lab3/lab3-jenkins/* gs://test1lab'
                         }
                         sh "gcloud compute ssh  iamprajeeth@jenkins --zone=us-central1-a --command 'sudo apt install apache2 -y'"
                     } catch (Exception e) {

@@ -31,10 +31,10 @@ pipeline {
                     try {
                         sh 'rm -rf *'
                         //sh 'gsutil cp -r gs://test1lab/ /'
-                        //sh "gcloud compute ssh  iamprajeeth@jenkins --zone=us-central1-a --command 'sudo gsutil -m cp -r gs://test1lab/ /var/lib/jenkins/workspace/; cd lab3-jenkins; ls'"
-                        //sh "gcloud compute ssh  iamprajeeth@jenkins --zone=us-central1-a --command 'sudo rm -rf /var/www/html/* ;sudo mv /var/lib/jenkins/workspace/test1lab/* /var/www/html/'"
+                        sh "gcloud compute ssh  iamprajeeth@jenkins --zone=us-central1-a --command 'sudo gsutil -m cp -r gs://test1lab/ /var/lib/jenkins/workspace/; cd lab3-jenkins; ls'"
+                        sh "gcloud compute ssh  iamprajeeth@jenkins --zone=us-central1-a --command 'sudo rm -rf /var/www/html/* ;sudo mv /var/lib/jenkins/workspace/test1lab/* /var/www/html/'"
                     
-                        sh 'false'
+                        //sh 'false'
                     } catch (Exception e) {
                         currentBuild.result = 'FAILURE'
                         sh """
